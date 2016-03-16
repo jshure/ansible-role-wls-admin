@@ -8,15 +8,39 @@
 
 print('Load the basic template')
 selectTemplate('Basic WebLogic Server Domain')
+#selectTemplate('Oracle Enterprise Manager')
 loadTemplates()
+
+print('Set options')
+setOption('JavaHome', '/usr/java/latest')
+setOption('OverwriteDomain', 'true')
+setOption('ServerStartMode','prod')
+setOption('OverwriteDomain', 'true')
+#setOption('NodeManagerType', 'CustomLocationNodeManager')
+#setOption('NodeManagerHome', '{{ domain_home }}/nodemanager')
 
 print('Create the admin server')
 cd('/Servers/AdminServer')
 cmo.setListenAddress('{{ ansible_hostname }}')
 set('ListenPort', 7001)
 set('WeblogicPluginEnabled', true)
+cmo.setKeyStores('CustomIdentityAndJavaStandardTrust')
+#DemoIdentity to start; replace later
+cmo.setCustomIdentityKeyStoreFileName('{{ domain_home }}/security/DemoIdentity.jks')
+cmo.setCustomIdentityKeyStoreType('JKS')
+cmo.setCustomIdentityKeyStorePassPhraseEncrypted('DemoIdentityKeyStorePassPhrase')
+cmo.setJavaStandardTrustKeyStorePassPhraseEncrypted('changeit')
+
+print('Set startup args')
+cd('/Servers/AdminServer')
+create('AdminServer','ServerStart')
+cd('ServerStart/AdminServer')
+set('Arguments', '-Xms2048m -Xmx2048m')
+set('JavaVendor','Sun')
+set('JavaHome', '{{ java_home }}')
 
 print('Create the SSL side')
+cd('/Servers/AdminServer')
 create('AdminServer','SSL')
 cd('SSL/AdminServer')
 set('Enabled', 'True')
@@ -26,22 +50,33 @@ print('Set the username/password')
 cd('/Security/base_domain/User/weblogic')
 cmo.setPassword('{{ weblogic_password }}')
 
-print('Set options')
-setOption('JavaHome', '/usr/java/latest')
-setOption('OverwriteDomain', 'true')
-setOption('ServerStartMode','prod')
-setOption('OverwriteDomain', 'true')
-
 print('Write the domain')
 writeDomain('{{ domain_home }}')
 closeTemplate()
 
 print('Finalize the admin server')
 readDomain('{{ domain_home }}')
+
+print('Set nodemanager infor for domain')
+cd('/SecurityConfiguration/{{ domain_name }}')
+cmo.setNodeManagerUsername('{{ weblogic_user }}')
+cmo.setNodeManagerPasswordEncrypted('{{ weblogic_password }}')
+
+print('Set SSL and no hostname validation')
+cd('/Servers/AdminServer')
+create('AdminServer','SSL')
+cd('SSL/AdminServer')
+cmo.setHostnameVerificationIgnored(true)
+cmo.setHostnameVerifier(None)
+cmo.setTwoWaySSLEnabled(false)
+cmo.setClientCertificateEnforced(false)
+
+print('set authentication flags')
+cd('/SecurityConfiguration/{{ domain_name }}/Realms/myrealm')
+cd('AuthenticationProviders/DefaultAuthenticator')
+set('ControlFlag', 'SUFFICIENT')
+
 updateDomain()
 closeDomain()
-
-print('Start admin server')
-startServer('AdminServer','{{ domain_name }}','t3://{{ ansible_hostname }}:7001','weblogic','{{ weblogic_password }}','{{ domain_home }}')
 
 exit()

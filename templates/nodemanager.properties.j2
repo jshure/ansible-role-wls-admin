@@ -1,0 +1,26 @@
+ListenAddress={{ ansible_fqdn }}
+ListenPort=5556
+SecureListener=true
+JavaHome={{ java_home }}
+NodeManagerHome={{ domain_home }}/nodemanager
+DomainsFile={{ domain_home }}/nodemanager/nodemanager.domains
+
+LogCount=1
+StopScriptEnabled=false
+QuitEnabled=false
+LogAppend=true
+StateCheckInterval=500
+CrashRecoveryEnabled=false
+StartScriptEnabled=true
+LogFile={{ domain_home }}/nodemanager/nodemanager.log
+LogFormatter=weblogic.nodemanager.server.LogFormatter
+ListenBacklog=50
+
+LogLimit=0
+PropertiesVersion=12.2.1
+AuthenticationEnabled=true
+LogLevel=INFO
+StartScriptName=startWebLogic.sh
+NativeVersionEnabled=true
+LogToStderr=true
+

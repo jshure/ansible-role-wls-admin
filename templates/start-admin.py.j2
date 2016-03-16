@@ -1,0 +1,6 @@
+
+nmConnect('{{ weblogic_user }}', '{{ weblogic_password }}', '{{ ansible_fqdn }}', '5556', '{{ domain_name }}');
+
+nmStart('AdminServer');
+
+nmDisconnect();

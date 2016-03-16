@@ -1,5 +1,12 @@
 ---
 
+- name: Configure Java to use `/dev/urandom`. 
+  lineinfile:
+    dest="{{ java_home }}/jre/lib/security/java.security"
+    regexp="^securerandom.source="
+    line="securerandom.source=file:/dev/./urandom"
+  become_user: root
+
 - name: copy over the create-admin.py script
   template: src=templates/create-admin.py.j2 dest="{{ mw_installer_folder }}/create-admin.py" mode=0700
 
@@ -17,8 +24,40 @@
 
 - name: create the security folder for boot.properties
   file: path="{{ domain_home }}/servers/AdminServer/security" state=directory mode=0750
-  become_user: "{{ oracle_user_name }}"
 
 - name: copy over the boot.properties file
   template: src=templates/boot.properties.j2 dest="{{ domain_home }}/servers/AdminServer/security/boot.properties" mode=0660
-  become_user: "{{ oracle_user_name }}"
+
+#
+# Nodemanager
+#
+- name: Copy Nodemanager Properties file
+  template: src=nodemanager.properties.j2 dest={{ nodemanager_home }}/nodemanager.properties
+      
+- name: Copy nodemanager systemd script
+  template: src=nodemanager.service.j2 dest=/etc/systemd/system/nodemanager.service mode=0755
+  become_user: root
+
+- name: Enable nodemanager as linux service
+  command: 'systemctl enable nodemanager'
+  become_user: root
+
+- name: Start Node Manager
+  command: 'systemctl start nodemanager'
+  become_user: root
+
+- name: Waiting for nodemanager to come up
+  wait_for: host="{{ ansible_fqdn }}" port=5556 delay=2 timeout=300
+  become_user: root
+            
+#
+# Start AdminServer
+#
+- name: Copy Admin Server start-up script
+  template: src=start-admin.py.j2 dest={{ mw_installer_folder }}/start-admin.py mode=0755
+
+- name: Execute start Admin Server script
+  shell: "{{ mw_home }}/oracle_common/common/bin/wlst.sh {{ mw_installer_folder }}/start-admin.py"
+
+- name: Wait for Admin Server to startup
+  wait_for: host="{{ ansible_fqdn }}" port=7001 delay=2 timeout=600
