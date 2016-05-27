@@ -1,0 +1,6 @@
+---
+
+  - name: copy over files to managed servers
+    copy: src=/tmp/packed.jar dest="{{ mw_installer_folder }}/packed.jar" 
+  - name: unpack the template
+    command: "{{ mw_home }}/oracle_common/common/bin/unpack.sh -domain {{ domain_home }} -template {{ mw_installer_folder }}/packed.jar"

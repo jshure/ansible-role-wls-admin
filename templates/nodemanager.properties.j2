@@ -1,26 +1,31 @@
-ListenAddress={{ ansible_fqdn }}
-ListenPort=5556
-SecureListener=true
-JavaHome={{ java_home }}
-NodeManagerHome={{ domain_home }}/nodemanager
 DomainsFile={{ domain_home }}/nodemanager/nodemanager.domains
-
+LogLimit=0
+PropertiesVersion=12.2.1
+AuthenticationEnabled=true
+NodeManagerHome={{ domain_home }}/nodemanager
+JavaHome={{ java_home }}
+LogLevel=INFO
+DomainsFileEnabled=true
+StartScriptName=startWebLogic.sh
+ListenAddress={{ ansible_fqdn }}
+NativeVersionEnabled=true
+ListenPort=5556
+LogToStderr=true
+SecureListener=true
 LogCount=1
 StopScriptEnabled=false
 QuitEnabled=false
 LogAppend=true
 StateCheckInterval=500
-CrashRecoveryEnabled=false
+CrashRecoveryEnabled=true
 StartScriptEnabled=true
 LogFile={{ domain_home }}/nodemanager/nodemanager.log
 LogFormatter=weblogic.nodemanager.server.LogFormatter
 ListenBacklog=50
 
-LogLimit=0
-PropertiesVersion=12.2.1
-AuthenticationEnabled=true
-LogLevel=INFO
-StartScriptName=startWebLogic.sh
-NativeVersionEnabled=true
-LogToStderr=true
-
+KeyStores=CustomIdentityAndJavaStandardTrust
+CustomIdentityKeystoreType=JKS
+CustomIdentityKeyStoreFileName={{ identity_keystore }}
+CustomIdentityKeyStorePassPhrase={{ keystore_password }}
+CustomIdentityAlias={{ ansible_fqdn }}
+CustomIdentityPrivateKeyPassPhrase={{ keystore_password }}

@@ -3,8 +3,8 @@ Description=WebLogic Nodemanager service, runs independently and before weblogic
 After=network.target
  
 [Service]
-User={{ oracle_user_name }}
-Group={{ oracle_group_name }}
+User={{ oracle_user }}
+Group={{ oracle_group }}
 Type=simple
 WorkingDirectory={{ nodemanager_home }}
 ExecStart={{ domain_home }}/bin/startNodeManager.sh

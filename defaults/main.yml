@@ -1,32 +1,24 @@
 ---
 # defaults file for staylorx.wlssoftware
 
-oracle_user_name: oracle
-oracle_group_name: oinstall 
+oracle_user: oracle
+oracle_group: oinstall 
 java_home: /usr/java/latest
-
 weblogic_user: weblogic
-#Override this in the play!
-weblogic_password: Welcome!
-
 oracle_base: /home/oracle
-
-# collapsing the product into the base... not going to install more than one product.
 mw_home: "{{ oracle_base }}/middleware"
 oracle_home: "{{ mw_home }}/oracle_common"
 wl_home: "{{ mw_home }}/wlserver"
 mw_installer_folder: "{{ oracle_base }}/installer"
 
+tls_path: /etc/pki/tls
+identity_keystore: "{{ oracle_base }}/identity.jks"
+
 domain_name: WLSDomain
 domain_home: "{{ oracle_base }}/config/domains/{{ domain_name }}"
 
 nodemanager_home: "{{ domain_home }}/nodemanager"
+overwrite_nodemanager: false
 
-# Override this with the correct templates from the install.
-# Examples here from the basic weblogic install.
-templates:
-  - { name: "Basic WebLogic Server Domain", version: "12.2.1" }
-  - { name: "WebLogic Advanced Web Services for JAX-RPC Extension", version: "12.2.1" }
-  - { name: "WebLogic Advanced Web Services for JAX-WS Extension", version: "12.2.1" }
-  - { name: "WebLogic Coherence Cluster Extension", version: "12.2.1" }
-  - { name: "WebLogic JAX-WS SOAP/JMS Extension", version: "12.2.1" }
+create_keystore: true
+create_domain: true

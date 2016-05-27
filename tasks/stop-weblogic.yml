@@ -1,0 +1,24 @@
+---
+
+  - hosts: admin
+    become: yes
+    become_user: oracle
+    vars:
+      stop_files:
+        - stop-managed
+        - stop-admin
+
+    tasks:
+      - name: shutdown managed servers
+        template: src=templates/{{ item }}.py.j2 dest=/home/oracle/{{ item }}.py mode=0700
+        with_items: stop_files
+
+      - name: Stop the managed server(s)
+        command: "{{ oracle_home }}/oracle_common/common/bin/wlst.sh /home/oracle/stop-managed.py"
+
+      - name: Stop the admin server(s)
+        command: "{{ oracle_home }}/oracle_common/common/bin/wlst.sh /home/oracle/stop-admin.py"
+
+      - file: path=/home/oracle/{{ item }}.py state=absent
+        with_items: stop_files
+

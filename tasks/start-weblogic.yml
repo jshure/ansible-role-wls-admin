@@ -1,0 +1,22 @@
+---
+
+  - hosts: admin
+    become: yes
+    become_user: oracle
+    vars:
+      start_files:
+        - start-admin
+        - start-managed
+
+    tasks:
+      - template: src=templates/{{ item }}.py.j2 dest=/home/oracle/{{ item }}.py mode=0700
+        with_items: start_files
+
+      - name: Start the admin server
+        command: "{{ oracle_home }}/oracle_common/common/bin/wlst.sh /home/oracle/start-admin.py"
+
+      - name: Start the managed server(s)
+        command: "{{ oracle_home }}/oracle_common/common/bin/wlst.sh /home/oracle/start-managed.py"
+
+      - file: path=/home/oracle/{{ item }}.py state=absent
+        with_items: start_files
