@@ -16,3 +16,9 @@
 - name: copy over the boot.properties file
   template: src=templates/boot.properties.j2 dest="{{ domain_home }}/servers/AdminServer/security/boot.properties" mode=0660
 
+- name: turn off derby
+  lineinfile: 
+    dest:        '{{ domain_home }}/bin/setDomainEnv.sh'
+    insertafter: '^# Set DERBY_FLAG, if derby is available.'
+    line:        'export DERBY_FLAG="false"'
+

@@ -11,11 +11,12 @@ oracle_home: "{{ mw_home }}/oracle_common"
 wl_home: "{{ mw_home }}/wlserver"
 mw_installer_folder: "{{ oracle_base }}/installer"
 
-tls_path: /etc/pki/tls
-identity_keystore: "{{ oracle_base }}/identity.jks"
-
 domain_name: WLSDomain
 domain_home: "{{ oracle_base }}/config/domains/{{ domain_name }}"
+
+tls_path: /etc/pki/tls
+identity_keystore_path: "{{ oracle_base }}/certs"
+identity_keystore_file: "{{ identity_keystore_path }}/identity.jks"
 
 nodemanager_home: "{{ domain_home }}/nodemanager"
 overwrite_nodemanager: false
