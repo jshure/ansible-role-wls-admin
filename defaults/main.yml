@@ -12,7 +12,7 @@ wl_home: "{{ mw_home }}/wlserver"
 mw_installer_folder: "{{ oracle_base }}/installer"
 
 domain_name: WLSDomain
-domain_home: "{{ oracle_base }}/config/domains/{{ domain_name }}"
+domain_home: "{{ oracle_base }}/user_projects/domains/{{ domain_name }}"
 
 tls_path: /etc/pki/tls
 identity_keystore_path: "{{ oracle_base }}/certs"
