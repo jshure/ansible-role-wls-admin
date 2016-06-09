@@ -1,12 +1,7 @@
 ---
 
-- include: create-keystore.yml
-  when: "{{ create_keystore }} == True"
-  become_user: root
-
-- include: create-domain.yml
-  when: "{{ create_domain }} == True"
-  become_user: oracle
+#- include: create-domain.yml
+#  become_user: oracle
 
 - include: create-nodemanager-service.yml
   become_user: root

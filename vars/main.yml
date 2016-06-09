@@ -1,5 +1,0 @@
----
-
-formatted_cert_name: "{{ ansible_fqdn | regex_replace('[\\.]+','_') }}"
-private_key_file: "{{ tls_path }}/private/{{ ansible_fqdn }}.key"
-public_cert_file: "{{ tls_path }}/certs/{{ formatted_cert_name }}_cert.cer"

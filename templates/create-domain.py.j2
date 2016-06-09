@@ -6,6 +6,78 @@
 # Steve.Taylor@cu.edu Mar-2016
 #
 
+def createMachine(name):
+    print('Create machine '+name)
+    cd('/')
+    create(name,'UnixMachine')
+    cd('Machines/'+name)
+    set('PostBindGIDEnabled',false)
+    set('PostBindGIDEnabled',false)
+    create(name,'NodeManager')
+    cd('NodeManager/'+name)
+    set('NMType','SSL')
+    set('ListenAddress',name)
+    set('ListenPort',5556)
+
+def createCluster(name,address):
+    print('Create cluster '+name)
+    cd('/')
+    create(name,'Cluster')
+    cd('/Clusters/'+name)
+    set('ClusterMessagingMode','unicast')
+    set('TxnAffinityEnabled',false)
+    set('DefaultLoadAlgorithm','round-robin')
+    set('ClusterAddress',address)
+
+def createServer(name,listen_address,listen_port,listen_port_ssl,machine):
+    print('Create server '+name)
+    cd('/')
+    create(name,'Server')
+    cd('/Servers/'+name)
+    set('ListenAddress',listen_address)
+    set('ListenPort', listen_port)
+    set('WeblogicPluginEnabled', true)
+    set('KeyStores','CustomIdentityAndJavaStandardTrust')
+    set('CustomIdentityKeyStoreFileName','{{ identity_keystore_file }}')
+    set('CustomIdentityKeyStoreType','JKS')
+    set('CustomIdentityKeyStorePassPhraseEncrypted','{{ keystore_password }}')
+    set('JavaStandardTrustKeyStorePassPhraseEncrypted','changeit')
+    set('Machine',machine)
+
+    create(name,'ServerStart')
+    cd('ServerStart/'+name)
+    set('Arguments', '-Xms2048m -Xmx2048m -Dweblogic.security.SSL.protocolVersion=TLS1')
+    set('JavaVendor','Sun')
+    set('JavaHome', '{{ java_home }}')
+
+    cd('/Servers/'+name)
+    create(name,'SSL')
+    cd('SSL/'+name)
+    set('Enabled', 'True')
+    set('ListenPort', listen_port_ssl)
+    set('ServerPrivateKeyAlias',machine)
+    set('ServerPrivateKeyPassPhraseEncrypted','{{ keystore_password }}')
+    #set('HostnameVerificationIgnored',true)
+    #set('HostnameVerifier',None)
+    set('TwoWaySSLEnabled',false)
+    set('ClientCertificateEnforced',false)
+    set('AcceptKssDemoCertsEnabled',false)
+
+def changeDatasources(environment_code,url):
+    cd('/')
+    services=cmo.getJDBCSystemResources()
+    for svc in services:
+       service_name=svc.getName();
+       print  'Changing Password & UserName for DataSource ', service_name
+       cd('/JDBCSystemResource/'+service_name+'/JdbcResource/'+service_name+'/JDBCDriverParams/NO_NAME_0')
+       set('URL',url)
+       set('PasswordEncrypted','{{ rcu_schema_password }}')
+       #Some regex goodness to change out the username
+       cd('Properties/NO_NAME_0/Property/user')
+       userName=get('Value')
+       userName=re.sub('^DEV_', environment_code+'_', userName)
+       set('Value',userName)
+
 print('Load the basic template')
 selectTemplate('Basic WebLogic Server Domain')
 loadTemplates()
@@ -17,7 +89,7 @@ setOption('OverwriteDomain', 'true')
 
 print('Create the admin server')
 cd('/Servers/AdminServer')
-cmo.setListenAddress('{{ ansible_fqdn }}')
+cmo.setListenAddress('{{ inventory_hostname }}')
 set('ListenPort', 7001)
 set('WeblogicPluginEnabled', true)
 cmo.setKeyStores('CustomIdentityAndJavaStandardTrust')
@@ -49,7 +121,8 @@ print('Write the domain')
 writeDomain('{{ domain_home }}')
 closeTemplate()
 
-print('Finalize the admin server')
+####################################
+print('Finalize the domain')
 readDomain('{{ domain_home }}')
 
 print('Set nodemanager infor for domain')
@@ -57,11 +130,11 @@ cd('/SecurityConfiguration/{{ domain_name }}')
 cmo.setNodeManagerUsername('{{ weblogic_user }}')
 cmo.setNodeManagerPasswordEncrypted('{{ weblogic_password }}')
 
-print('Set SSL and no hostname validation')
+print('Set SSL and hostname validation')
 cd('/Servers/AdminServer')
 create('AdminServer','SSL')
 cd('SSL/AdminServer')
-cmo.setServerPrivateKeyAlias('{{ ansible_fqdn }}')
+cmo.setServerPrivateKeyAlias('{{ inventory_hostname }}')
 cmo.setServerPrivateKeyPassPhraseEncrypted('{{ keystore_password }}')
 #cmo.setHostnameVerificationIgnored(true)
 #cmo.setHostnameVerifier(None)
@@ -73,24 +146,37 @@ cd('/SecurityConfiguration/{{ domain_name }}/Realms/myrealm')
 cd('AuthenticationProviders/DefaultAuthenticator')
 set('ControlFlag', 'SUFFICIENT')
 
-#print('Create admin machine')
-cd('/')
-create('{{ ansible_fqdn }}','UnixMachine')
-cd('Machines/{{ ansible_fqdn }}')
-set('PostBindGIDEnabled',false)
-set('PostBindGIDEnabled',false)
+{% for machine in groups['weblogic'] %}
+createMachine('{{ machine }}')
+{% endfor %}
 
-create('{{ ansible_fqdn }}','NodeManager')
-cd('NodeManager/{{ ansible_fqdn }}')
-set('NMType','SSL')
-set('ListenAddress','{{ ansible_fqdn }}')
-set('ListenPort',5556)
-
-#assign AdminServer to the machine
+#assign AdminServer to a machine
 cd('/Servers/AdminServer')
-set('Machine','{{ ansible_fqdn }}')
+set('Machine','{{ inventory_hostname }}')
+
+{% for key,value in domain.clusters.iteritems() %}
+createCluster('{{ key }}','{{ value.addresses | join(',') }}')
+{% endfor %}
+
+{% for key,value in domain.servers.iteritems() %}
+createServer('{{ key }}','{{ value.listen_address }}',{{ value.listen_port }},{{ value.listen_port_ssl }},'{{ value.machine }}')
+{% endfor %}
 
 updateDomain()
 closeDomain()
 
+################################
+#TODO Maybe someday but the OPSS thing really gums up CI/CD
+#print('Add templates to the domain')
+#readDomain('{{ domain_home }}')
+#selectTemplate('Oracle Enterprise Manager')
+#loadTemplates()
+#
+#print('Update datasources for templates')
+#changeDatasources('{{ rcu_prefix }}','jdbc:oracle:thin:@{{ rcu_hostname }}:{{ rcu_port }}/{{ rcu_service }}')
+#
+#updateDomain()
+#closeDomain()
+
 exit()
+

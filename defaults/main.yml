@@ -1,5 +1,4 @@
 ---
-# defaults file for staylorx.wlssoftware
 
 oracle_user: oracle
 oracle_group: oinstall 
@@ -14,12 +13,8 @@ mw_installer_folder: "{{ oracle_base }}/installer"
 domain_name: WLSDomain
 domain_home: "{{ oracle_base }}/user_projects/domains/{{ domain_name }}"
 
-tls_path: /etc/pki/tls
 identity_keystore_path: "{{ oracle_base }}/certs"
 identity_keystore_file: "{{ identity_keystore_path }}/identity.jks"
 
 nodemanager_home: "{{ domain_home }}/nodemanager"
-overwrite_nodemanager: false
 
-create_keystore: true
-create_domain: true
