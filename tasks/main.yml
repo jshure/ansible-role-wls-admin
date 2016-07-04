@@ -1,7 +1,7 @@
 ---
 
-#- include: create-domain.yml
-#  become_user: oracle
+- include: create-domain.yml
+  become_user: oracle
 
 - include: create-nodemanager-service.yml
   become_user: root

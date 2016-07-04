@@ -6,63 +6,7 @@
 # Steve.Taylor@cu.edu Mar-2016
 #
 
-def createMachine(name):
-    print('Create machine '+name)
-    cd('/')
-    create(name,'UnixMachine')
-    cd('Machines/'+name)
-    set('PostBindGIDEnabled',false)
-    set('PostBindGIDEnabled',false)
-    create(name,'NodeManager')
-    cd('NodeManager/'+name)
-    set('NMType','SSL')
-    set('ListenAddress',name)
-    set('ListenPort',5556)
-
-def createCluster(name,address):
-    print('Create cluster '+name)
-    cd('/')
-    create(name,'Cluster')
-    cd('/Clusters/'+name)
-    set('ClusterMessagingMode','unicast')
-    set('TxnAffinityEnabled',false)
-    set('DefaultLoadAlgorithm','round-robin')
-    set('ClusterAddress',address)
-
-def createServer(name,listen_address,listen_port,listen_port_ssl,machine):
-    print('Create server '+name)
-    cd('/')
-    create(name,'Server')
-    cd('/Servers/'+name)
-    set('ListenAddress',listen_address)
-    set('ListenPort', listen_port)
-    set('WeblogicPluginEnabled', true)
-    set('KeyStores','CustomIdentityAndJavaStandardTrust')
-    set('CustomIdentityKeyStoreFileName','{{ identity_keystore_file }}')
-    set('CustomIdentityKeyStoreType','JKS')
-    set('CustomIdentityKeyStorePassPhraseEncrypted','{{ keystore_password }}')
-    set('JavaStandardTrustKeyStorePassPhraseEncrypted','changeit')
-    set('Machine',machine)
-
-    create(name,'ServerStart')
-    cd('ServerStart/'+name)
-    set('Arguments', '-Xms2048m -Xmx2048m -Dweblogic.security.SSL.protocolVersion=TLS1')
-    set('JavaVendor','Sun')
-    set('JavaHome', '{{ java_home }}')
-
-    cd('/Servers/'+name)
-    create(name,'SSL')
-    cd('SSL/'+name)
-    set('Enabled', 'True')
-    set('ListenPort', listen_port_ssl)
-    set('ServerPrivateKeyAlias',machine)
-    set('ServerPrivateKeyPassPhraseEncrypted','{{ keystore_password }}')
-    #set('HostnameVerificationIgnored',true)
-    #set('HostnameVerifier',None)
-    set('TwoWaySSLEnabled',false)
-    set('ClientCertificateEnforced',false)
-    set('AcceptKssDemoCertsEnabled',false)
-
+#TODO This is here for reference... to be templated in later.
 def changeDatasources(environment_code,url):
     cd('/')
     services=cmo.getJDBCSystemResources()
@@ -125,7 +69,7 @@ closeTemplate()
 print('Finalize the domain')
 readDomain('{{ domain_home }}')
 
-print('Set nodemanager infor for domain')
+print('Set nodemanager info for domain')
 cd('/SecurityConfiguration/{{ domain_name }}')
 cmo.setNodeManagerUsername('{{ weblogic_user }}')
 cmo.setNodeManagerPasswordEncrypted('{{ weblogic_password }}')
@@ -146,20 +90,76 @@ cd('/SecurityConfiguration/{{ domain_name }}/Realms/myrealm')
 cd('AuthenticationProviders/DefaultAuthenticator')
 set('ControlFlag', 'SUFFICIENT')
 
+#machines are created from inventory
 {% for machine in groups['weblogic'] %}
-createMachine('{{ machine }}')
+print('Create machine {{ machine }}')
+cd('/')
+create('{{ machine }}','UnixMachine')
+cd('Machines/{{ machine }}')
+set('PostBindGIDEnabled',false)
+set('PostBindGIDEnabled',false)
+create('{{ machine }}','NodeManager') 
+cd('NodeManager/{{ machine }}')
+set('NMType','SSL') 
+set('ListenAddress','{{ machine }}') 
+set('ListenPort',5556) 
+
 {% endfor %}
 
-#assign AdminServer to a machine
+#assign AdminServer to a machine... implied that the the machine name is the hostname
 cd('/Servers/AdminServer')
 set('Machine','{{ inventory_hostname }}')
 
 {% for key,value in domain.clusters.iteritems() %}
-createCluster('{{ key }}','{{ value.addresses | join(',') }}')
-{% endfor %}
+print('Create cluster {{ key }}')
+cd('/')
+create('{{ key }}','Cluster')
+cd('/Clusters/{{ key }}')
+set('ClusterMessagingMode','unicast')
+set('TxnAffinityEnabled',false)
+set('DefaultLoadAlgorithm','round-robin')
+set('ClusterAddress','{{ value.addresses | join(',') }}')
 
+{% endfor %}
+updateDomain()
+closeDomain()
+
+###############################
+#### create servers
+readDomain('{{ domain_home }}')
 {% for key,value in domain.servers.iteritems() %}
-createServer('{{ key }}','{{ value.listen_address }}',{{ value.listen_port }},{{ value.listen_port_ssl }},'{{ value.machine }}')
+print('Create server {{ key }}')
+cd('/')
+create('{{ key }}','Server')
+cd('/Servers/{{ key }}')
+set('ListenAddress', '{{ value.listen_address }}')
+set('ListenPort', {{ value.listen_port }})
+set('WeblogicPluginEnabled', true)
+set('KeyStores','CustomIdentityAndJavaStandardTrust')
+set('CustomIdentityKeyStoreFileName','{{ identity_keystore_file }}')
+set('CustomIdentityKeyStoreType','JKS')
+set('CustomIdentityKeyStorePassPhraseEncrypted','{{ keystore_password }}')
+set('JavaStandardTrustKeyStorePassPhraseEncrypted','changeit')
+set('Machine','{{ value.machine }}')
+set('Cluster','{{ value.cluster }}')
+
+create('{{ key }}','ServerStart')
+cd('ServerStart/{{ key }}')
+set('Arguments', '-Xms3072m -Xmx3072m -Dweblogic.security.SSL.protocolVersion=TLS1')
+set('JavaVendor','Sun')
+set('JavaHome', '{{ java_home }}')
+  
+cd('/Servers/{{ key }}')
+create('{{ key }}','SSL')
+cd('SSL/{{ key }}')
+set('Enabled', 'True')
+set('ListenPort', {{ value.listen_port_ssl }})
+set('ServerPrivateKeyAlias','{{ value.machine }}')
+set('ServerPrivateKeyPassPhraseEncrypted','{{ keystore_password }}')
+set('TwoWaySSLEnabled',false)
+set('ClientCertificateEnforced',false)
+set('AcceptKssDemoCertsEnabled',false)
+ 
 {% endfor %}
 
 updateDomain()

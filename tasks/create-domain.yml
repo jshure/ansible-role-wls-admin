@@ -1,8 +1,10 @@
 ---
 
 - name: template over the create-domain.py script
-  template: src=templates/create-domain.py.j2 dest="{{ mw_installer_folder }}/create-domain.py" mode=0700
-- template: src=templates/create-servers.py.j2 dest="{{ mw_installer_folder }}/create-servers.py" mode=0700
+  template: >
+   src=../templates/create-domain.py.j2
+   dest="{{ mw_installer_folder }}/create-domain.py"
+   mode=0700
 
 - name: check for domain home already installed
   stat: path="{{ domain_home }}"
@@ -15,7 +17,7 @@
   file: path="{{ domain_home }}/servers/AdminServer/security" state=directory mode=0750
 
 - name: copy over the boot.properties file
-  template: src=templates/boot.properties.j2 dest="{{ domain_home }}/servers/AdminServer/security/boot.properties" mode=0660
+  template: src=../templates/boot.properties.j2 dest="{{ domain_home }}/servers/AdminServer/security/boot.properties" mode=0660
 
 - name: turn off derby
   lineinfile: 
