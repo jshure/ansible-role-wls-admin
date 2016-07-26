@@ -1,10 +1,9 @@
 ---
 
+# a place to drop start and stop scripts
+- name: create scripts folder
+  file: path="{{ oracle_base }}/scripts" mode=0700 owner="{{ oracle_user }}" group="{{ oracle_group }}"
+
 - include: create-domain.yml
   become_user: oracle
 
-- include: create-nodemanager-service.yml
-  become_user: root
-
-- include: start-admin.yml
-  become_user: oracle

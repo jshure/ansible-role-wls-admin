@@ -1,8 +1,0 @@
----
-
-  - file: path="{{ mw_installer_folder }}/packed.jar" state=absent
-  - name: pack the domain
-    command: "{{ mw_home }}/oracle_common/common/bin/pack.sh -domain {{ domain_home }} -managed true -template {{ mw_installer_folder }}/packed.jar -template_name EDQ-Packed"
-
-   - name: bring the template over
-     fetch: src="{{ mw_installer_folder }}/packed.jar" dest=/tmp/packed.jar flat=yes 

@@ -1,0 +1,16 @@
+[Unit]
+Description=WebLogic AdminServer
+After=nodemanager.service
+
+[Service]
+User=oracle
+Group=oinstall
+Type=simple
+RemainAfterExit=true
+WorkingDirectory={{ domain_home }}
+ExecStart={{ oracle_home }}/common/bin/wlst.sh {{ oracle_base }}/scripts/start-admin.py
+ExecStop={{ oracle_home }}/common/bin/wlst.sh {{ oracle_base }}/home/oracle/scripts/stop-admin.py
+
+[Install]
+WantedBy=default.target
+

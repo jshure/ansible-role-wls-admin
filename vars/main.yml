@@ -1,0 +1,4 @@
+---
+
+packed_template_name: "{{ domain_name }}-packed.jar"
+packed_template_path: "{{ mw_installer_folder }}/{{ packed_template_name }}"
