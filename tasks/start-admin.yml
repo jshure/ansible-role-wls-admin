@@ -1,8 +1,0 @@
----
-
-- name: template over the start-admin script
-  template: src=start-admin.py.j2 dest="{{ mw_installer_folder }}/start-admin.py" owner="{{ oracle_user }}" group="{{ oracle_group }}" mode=0700
-
-- name: start admin/domain
-  command: "{{ mw_home }}/oracle_common/common/bin/wlst.sh {{ mw_installer_folder }}/start-admin.py"
-

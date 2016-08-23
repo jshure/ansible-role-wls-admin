@@ -9,6 +9,7 @@ mw_home: "{{ oracle_base }}/middleware"
 oracle_home: "{{ mw_home }}/oracle_common"
 wl_home: "{{ mw_home }}/wlserver"
 mw_installer_folder: "{{ oracle_base }}/installer"
+scripts_home: "{{ oracle_base }}/scripts"
 
 domain_name: WLSDomain
 domain_home: "{{ oracle_base }}/user_projects/domains/{{ domain_name }}"

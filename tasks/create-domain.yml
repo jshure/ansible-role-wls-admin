@@ -1,10 +1,10 @@
 ---
 
 - name: template over the create-domain.py script
-  template: >
-   src=../templates/create-domain.py.j2
-   dest="{{ mw_installer_folder }}/create-domain.py"
-   mode=0700
+  template: 
+   src:  ../templates/create-domain.py.j2
+   dest: "{{ mw_installer_folder }}/create-domain.py"
+   mode: 0700
 
 - name: check for domain home already installed
   stat: path="{{ domain_home }}"
@@ -24,4 +24,28 @@
     dest:        '{{ domain_home }}/bin/setDomainEnv.sh'
     insertafter: '^# Set DERBY_FLAG, if derby is available.'
     line:        'export DERBY_FLAG="false"'
+
+- name: template over the start-admin script
+  template: 
+    src:   start-admin.py.j2
+    dest:  "{{ scripts_home }}/start-admin.py" 
+    owner: "{{ oracle_user }}" 
+    group: "{{ oracle_group }}" 
+    mode:  0700
+
+- name: Copy wls-admin systemd script
+  template: 
+    src:  ../templates/wls-admin.service.j2 
+    dest: /etc/systemd/system/wls-admin.service 
+    mode: 0755
+  become: yes
+  become_user: root
+
+- name: Enable wls-admin as linux service
+  service: 
+    name: wls-admin
+    enabled: true
+    state: restarted
+  become: yes
+  become_user: root
 
