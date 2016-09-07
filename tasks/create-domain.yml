@@ -33,6 +33,14 @@
     group: "{{ oracle_group }}" 
     mode:  0700
 
+- name: template over the stop-admin script
+  template: 
+    src:   stop-admin.py.j2
+    dest:  "{{ scripts_home }}/stop-admin.py" 
+    owner: "{{ oracle_user }}" 
+    group: "{{ oracle_group }}" 
+    mode:  0700
+
 - name: Copy wls-admin systemd script
   template: 
     src:  ../templates/wls-admin.service.j2 
