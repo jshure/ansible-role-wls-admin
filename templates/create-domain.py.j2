@@ -3,24 +3,8 @@
 #
 # Templated for Ansible
 #
-# Steve.Taylor@cu.edu Mar-2016
+# Steve.Taylor@cu.edu Oct-2016
 #
-
-#TODO This is here for reference... to be templated in later.
-def changeDatasources(environment_code,url):
-    cd('/')
-    services=cmo.getJDBCSystemResources()
-    for svc in services:
-       service_name=svc.getName();
-       print  'Changing Password & UserName for DataSource ', service_name
-       cd('/JDBCSystemResource/'+service_name+'/JdbcResource/'+service_name+'/JDBCDriverParams/NO_NAME_0')
-       set('URL',url)
-       set('PasswordEncrypted','{{ rcu_schema_password }}')
-       #Some regex goodness to change out the username
-       cd('Properties/NO_NAME_0/Property/user')
-       userName=get('Value')
-       userName=re.sub('^DEV_', environment_code+'_', userName)
-       set('Value',userName)
 
 print('Load the basic template')
 selectTemplate('Basic WebLogic Server Domain')
@@ -164,19 +148,6 @@ set('AcceptKssDemoCertsEnabled',false)
 
 updateDomain()
 closeDomain()
-
-################################
-#TODO Maybe someday but the OPSS thing really gums up CI/CD
-#print('Add templates to the domain')
-#readDomain('{{ domain_home }}')
-#selectTemplate('Oracle Enterprise Manager')
-#loadTemplates()
-#
-#print('Update datasources for templates')
-#changeDatasources('{{ rcu_prefix }}','jdbc:oracle:thin:@{{ rcu_hostname }}:{{ rcu_port }}/{{ rcu_service }}')
-#
-#updateDomain()
-#closeDomain()
 
 exit()
 
