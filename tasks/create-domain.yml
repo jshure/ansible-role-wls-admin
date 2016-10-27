@@ -57,3 +57,7 @@
   become: yes
   become_user: root
 
+- name: clean up create-domain.py script
+  file: 
+   path: "{{ mw_installer_folder }}/create-domain.py"
+   state: absent
