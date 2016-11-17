@@ -2,7 +2,7 @@
 
 oracle_user: oracle
 oracle_group: oinstall 
-java_home: /usr/java/latest
+java_home: /usr/java/default
 weblogic_user: weblogic
 oracle_base: /home/oracle
 domain_base: /home/oracle
