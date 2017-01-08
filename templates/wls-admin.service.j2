@@ -1,6 +1,7 @@
 [Unit]
 Description=WebLogic AdminServer
 After=nodemanager.service
+Wants=nodemanager.service
 
 [Service]
 User=oracle
