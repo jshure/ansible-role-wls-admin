@@ -45,7 +45,7 @@
   template: 
     src:  ../templates/wls-admin.service.j2 
     dest: /etc/systemd/system/wls-admin.service 
-    mode: 0755
+    mode: 0644
   become: yes
   become_user: root
 
