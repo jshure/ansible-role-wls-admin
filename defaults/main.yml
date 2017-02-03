@@ -5,7 +5,7 @@ oracle_group: oinstall
 java_home: /usr/java/default
 weblogic_user: weblogic
 oracle_base: /home/oracle
-domain_base: /home/oracle
+domain_base: /opt/oracle
 mw_home: "{{ oracle_base }}/middleware"
 oracle_home: "{{ mw_home }}/oracle_common"
 wl_home: "{{ mw_home }}/wlserver"
