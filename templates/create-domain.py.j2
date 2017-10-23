@@ -23,21 +23,18 @@ set('WeblogicPluginEnabled', true)
 
 ##############################
 {% if use_ssl %}
-
 print('Create Admin keystore')
 cmo.setKeyStores('CustomIdentityAndJavaStandardTrust')
 cmo.setCustomIdentityKeyStoreFileName('{{ identity_keystore_file }}')
 cmo.setCustomIdentityKeyStoreType('JKS')
 cmo.setCustomIdentityKeyStorePassPhraseEncrypted('{{ keystore_password }}')
 cmo.setJavaStandardTrustKeyStorePassPhraseEncrypted('changeit')
-
 print('Create the SSL side')
 cd('/Servers/AdminServer')
 create('AdminServer','SSL')
 cd('SSL/AdminServer')
 set('Enabled', 'True')
 set('ListenPort', 7002)
-
 print('Set SSL and hostname validation')
 #cd('/Servers/AdminServer')
 #create('AdminServer','SSL')
@@ -48,9 +45,8 @@ cmo.setServerPrivateKeyPassPhraseEncrypted('{{ keystore_password }}')
 #cmo.setHostnameVerifier(None)
 cmo.setTwoWaySSLEnabled(false)
 cmo.setClientCertificateEnforced(false)
-
-{% else %}
-print('Not configuring SSL - skipping Admin SSL  config')
+#{% else %}
+#print('Not configuring SSL - skipping Admin SSL  config')
 {% endif %}
 
 print('Set startup args')
@@ -175,8 +171,8 @@ set('ServerPrivateKeyPassPhraseEncrypted','{{ keystore_password }}')
 set('TwoWaySSLEnabled',false)
 set('ClientCertificateEnforced',false)
 set('AcceptKssDemoCertsEnabled',false)
-{% else %}
-print('Not configuring SSL - skipping {% key %} SSL config')
+#{% else %}
+#print('Not configuring SSL - skipping {% key %} SSL config')
 {% endif %}
 
 create('{{ key }}','ServerStart')
