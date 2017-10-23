@@ -45,8 +45,6 @@ cmo.setServerPrivateKeyPassPhraseEncrypted('{{ keystore_password }}')
 #cmo.setHostnameVerifier(None)
 cmo.setTwoWaySSLEnabled(false)
 cmo.setClientCertificateEnforced(false)
-#{% else %}
-#print('Not configuring SSL - skipping Admin SSL  config')
 {% endif %}
 
 print('Set startup args')
@@ -56,18 +54,6 @@ cd('ServerStart/AdminServer')
 set('Arguments', '-Xms2048m -Xmx2048m -Dweblogic.security.SSL.protocolVersion=TLS1')
 set('JavaVendor','Sun')
 set('JavaHome', '{{ java_home }}')
-
-#{% if use_ssl %}
-#print('Create the SSL side')
-#cd('/Servers/AdminServer')
-#create('AdminServer','SSL')
-#cd('SSL/AdminServer')
-#set('Enabled', 'True')
-#set('ListenPort', 7002)
-
-#{% else %}
-#print('Not configuring SSL - skipping turning on Admin SSL')
-#{% endif %}
 
 print('Set the username/password')
 cd('/Security/base_domain/User/weblogic')
@@ -85,21 +71,6 @@ print('Set nodemanager info for domain')
 cd('/SecurityConfiguration/{{ domain_name }}')
 cmo.setNodeManagerUsername('{{ weblogic_user }}')
 cmo.setNodeManagerPasswordEncrypted('{{ weblogic_password }}')
-
-#{% if use_ssl %}
-#print('Set SSL and hostname validation')
-#cd('/Servers/AdminServer')
-#create('AdminServer','SSL')
-#cd('SSL/AdminServer')
-#cmo.setServerPrivateKeyAlias('{{ inventory_hostname }}')
-#cmo.setServerPrivateKeyPassPhraseEncrypted('{{ keystore_password }}')
-##cmo.setHostnameVerificationIgnored(true)
-##cmo.setHostnameVerifier(None)
-#cmo.setTwoWaySSLEnabled(false)
-#cmo.setClientCertificateEnforced(false)
-#{% else %}
-#print('Not configuring SSL - skipping Admin SSL and hostname config')
-#{% endif %}
 
 print('set authentication flags')
 cd('/SecurityConfiguration/{{ domain_name }}/Realms/myrealm')
@@ -171,8 +142,6 @@ set('ServerPrivateKeyPassPhraseEncrypted','{{ keystore_password }}')
 set('TwoWaySSLEnabled',false)
 set('ClientCertificateEnforced',false)
 set('AcceptKssDemoCertsEnabled',false)
-#{% else %}
-#print('Not configuring SSL - skipping {% key %} SSL config')
 {% endif %}
 
 create('{{ key }}','ServerStart')
