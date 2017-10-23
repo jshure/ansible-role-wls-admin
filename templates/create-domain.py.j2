@@ -80,7 +80,7 @@ cmo.setPassword('{{ weblogic_password }}')
 print('Write the domain')
 writeDomain('{{ domain_home }}')
 closeTemplate()
-{% if use_ssl %}
+
 ####################################
 print('Finalize the domain')
 readDomain('{{ domain_home }}')
