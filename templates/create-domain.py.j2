@@ -20,11 +20,38 @@ cd('/Servers/AdminServer')
 cmo.setListenAddress('{{ inventory_hostname }}')
 set('ListenPort', 7001)
 set('WeblogicPluginEnabled', true)
+
+##############################
+{% if use_ssl %}
+
+print('Create Admin keystore')
 cmo.setKeyStores('CustomIdentityAndJavaStandardTrust')
 cmo.setCustomIdentityKeyStoreFileName('{{ identity_keystore_file }}')
 cmo.setCustomIdentityKeyStoreType('JKS')
 cmo.setCustomIdentityKeyStorePassPhraseEncrypted('{{ keystore_password }}')
 cmo.setJavaStandardTrustKeyStorePassPhraseEncrypted('changeit')
+
+print('Create the SSL side')
+cd('/Servers/AdminServer')
+create('AdminServer','SSL')
+cd('SSL/AdminServer')
+set('Enabled', 'True')
+set('ListenPort', 7002)
+
+print('Set SSL and hostname validation')
+#cd('/Servers/AdminServer')
+#create('AdminServer','SSL')
+#cd('SSL/AdminServer')
+cmo.setServerPrivateKeyAlias('{{ inventory_hostname }}')
+cmo.setServerPrivateKeyPassPhraseEncrypted('{{ keystore_password }}')
+#cmo.setHostnameVerificationIgnored(true)
+#cmo.setHostnameVerifier(None)
+cmo.setTwoWaySSLEnabled(false)
+cmo.setClientCertificateEnforced(false)
+
+{% else %}
+print('Not configuring SSL - skipping Admin SSL  config')
+{% endif %}
 
 print('Set startup args')
 cd('/Servers/AdminServer')
@@ -34,12 +61,17 @@ set('Arguments', '-Xms2048m -Xmx2048m -Dweblogic.security.SSL.protocolVersion=TL
 set('JavaVendor','Sun')
 set('JavaHome', '{{ java_home }}')
 
-print('Create the SSL side')
-cd('/Servers/AdminServer')
-create('AdminServer','SSL')
-cd('SSL/AdminServer')
-set('Enabled', 'True')
-set('ListenPort', 7002)
+#{% if use_ssl %}
+#print('Create the SSL side')
+#cd('/Servers/AdminServer')
+#create('AdminServer','SSL')
+#cd('SSL/AdminServer')
+#set('Enabled', 'True')
+#set('ListenPort', 7002)
+
+#{% else %}
+#print('Not configuring SSL - skipping turning on Admin SSL')
+#{% endif %}
 
 print('Set the username/password')
 cd('/Security/base_domain/User/weblogic')
@@ -48,7 +80,7 @@ cmo.setPassword('{{ weblogic_password }}')
 print('Write the domain')
 writeDomain('{{ domain_home }}')
 closeTemplate()
-
+{% if use_ssl %}
 ####################################
 print('Finalize the domain')
 readDomain('{{ domain_home }}')
@@ -58,16 +90,20 @@ cd('/SecurityConfiguration/{{ domain_name }}')
 cmo.setNodeManagerUsername('{{ weblogic_user }}')
 cmo.setNodeManagerPasswordEncrypted('{{ weblogic_password }}')
 
-print('Set SSL and hostname validation')
-cd('/Servers/AdminServer')
-create('AdminServer','SSL')
-cd('SSL/AdminServer')
-cmo.setServerPrivateKeyAlias('{{ inventory_hostname }}')
-cmo.setServerPrivateKeyPassPhraseEncrypted('{{ keystore_password }}')
-#cmo.setHostnameVerificationIgnored(true)
-#cmo.setHostnameVerifier(None)
-cmo.setTwoWaySSLEnabled(false)
-cmo.setClientCertificateEnforced(false)
+#{% if use_ssl %}
+#print('Set SSL and hostname validation')
+#cd('/Servers/AdminServer')
+#create('AdminServer','SSL')
+#cd('SSL/AdminServer')
+#cmo.setServerPrivateKeyAlias('{{ inventory_hostname }}')
+#cmo.setServerPrivateKeyPassPhraseEncrypted('{{ keystore_password }}')
+##cmo.setHostnameVerificationIgnored(true)
+##cmo.setHostnameVerifier(None)
+#cmo.setTwoWaySSLEnabled(false)
+#cmo.setClientCertificateEnforced(false)
+#{% else %}
+#print('Not configuring SSL - skipping Admin SSL and hostname config')
+#{% endif %}
 
 print('set authentication flags')
 cd('/SecurityConfiguration/{{ domain_name }}/Realms/myrealm')
@@ -119,21 +155,17 @@ cd('/Servers/{{ key }}')
 set('ListenAddress', '{{ value.listen_address }}')
 set('ListenPort', {{ value.listen_port }})
 set('WeblogicPluginEnabled', true)
+
+set('Machine','{{ value.machine }}')
+set('Cluster','{{ value.cluster }}')
+
+{% if use_ssl %}
 set('KeyStores','CustomIdentityAndJavaStandardTrust')
 set('CustomIdentityKeyStoreFileName','{{ identity_keystore_file }}')
 set('CustomIdentityKeyStoreType','JKS')
 set('CustomIdentityKeyStorePassPhraseEncrypted','{{ keystore_password }}')
 set('JavaStandardTrustKeyStorePassPhraseEncrypted','changeit')
-set('Machine','{{ value.machine }}')
-set('Cluster','{{ value.cluster }}')
-
-create('{{ key }}','ServerStart')
-cd('ServerStart/{{ key }}')
-set('Arguments', '-Xms3072m -Xmx3072m -Dweblogic.security.SSL.protocolVersion=TLS1')
-set('JavaVendor','Sun')
-set('JavaHome', '{{ java_home }}')
-  
-cd('/Servers/{{ key }}')
+#cd('/Servers/{{ key }}')
 create('{{ key }}','SSL')
 cd('SSL/{{ key }}')
 set('Enabled', 'True')
@@ -143,6 +175,15 @@ set('ServerPrivateKeyPassPhraseEncrypted','{{ keystore_password }}')
 set('TwoWaySSLEnabled',false)
 set('ClientCertificateEnforced',false)
 set('AcceptKssDemoCertsEnabled',false)
+{% else %}
+print('Not configuring SSL - skipping {% key %} SSL config')
+{% endif %}
+
+create('{{ key }}','ServerStart')
+cd('ServerStart/{{ key }}')
+set('Arguments', '-Xms3072m -Xmx3072m -Dweblogic.security.SSL.protocolVersion=TLS1')
+set('JavaVendor','Sun')
+set('JavaHome', '{{ java_home }}')
  
 {% endfor %}
 
