@@ -6,6 +6,7 @@ java_home: /usr/java/default
 weblogic_user: weblogic
 oracle_base: /opt/oracle
 domain_base: /home/oracle
+generic_host: false
 use_ssl: true
 mw_home: "{{ oracle_base }}/middleware"
 oracle_home: "{{ mw_home }}/oracle_common"

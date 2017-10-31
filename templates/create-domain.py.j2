@@ -17,7 +17,11 @@ setOption('OverwriteDomain', 'true')
 
 print('Create the admin server')
 cd('/Servers/AdminServer')
+{% if generic_host %}
+cmo.setListenAddress('')
+{% else %}
 cmo.setListenAddress('{{ inventory_hostname }}')
+{% endif %}
 set('ListenPort', 7001)
 set('WeblogicPluginEnabled', true)
 
