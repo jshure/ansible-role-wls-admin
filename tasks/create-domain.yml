@@ -54,6 +54,6 @@
 #    state: restarted
 
 - name: clean up create-domain.py script
-   file: 
+  file: 
    path: "{{ mw_installer_folder }}/create-domain.py"
    state: absent
