@@ -5,75 +5,55 @@
    src:  ../templates/create-domain.py.j2
    dest: "{{ mw_installer_folder }}/create-domain.py"
    mode: 0700
-  become: yes
-  become_user: oracle
 
 - name: check for domain home already installed
   stat: path="{{ domain_home }}"
   register: domain_home_var
-  become: yes
-  become_user: oracle
 
 - name: create admin/domain
   command: "{{ mw_home }}/oracle_common/common/bin/wlst.sh {{ mw_installer_folder }}/create-domain.py"
-  become: yes
-  become_user: oracle
 
 - name: create the security folder for boot.properties
   file: path="{{ domain_home }}/servers/AdminServer/security" state=directory mode=0750
-  become: yes
-  become_user: oracle
 
 - name: copy over the boot.properties file
   template: src=../templates/boot.properties.j2 dest="{{ domain_home }}/servers/AdminServer/security/boot.properties" mode=0660
-  become: yes
-  become_user: oracle
 
 - name: turn off derby
   lineinfile: 
     dest:        '{{ domain_home }}/bin/setDomainEnv.sh'
     insertafter: '^# Set DERBY_FLAG, if derby is available.'
     line:        'export DERBY_FLAG="false"'
-  become: yes
-  become_user: oracle
 
-- name: template over the start-admin script
-  template: 
-    src:   start-admin.py.j2
-    dest:  "{{ scripts_home }}/start-admin.py" 
-    owner: "{{ oracle_user }}" 
-    group: "{{ oracle_group }}" 
-    mode:  0700
-  become: yes
-  become_user: oracle
+#- name: template over the start-admin script
+#  template: 
+#    src:   start-admin.py.j2
+#    dest:  "{{ scripts_home }}/start-admin.py" 
+#    owner: "{{ oracle_user }}" 
+#    group: "{{ oracle_group }}" 
+#    mode:  0700
 
-- name: template over the stop-admin script
-  template: 
-    src:   stop-admin.py.j2
-    dest:  "{{ scripts_home }}/stop-admin.py" 
-    owner: "{{ oracle_user }}" 
-    group: "{{ oracle_group }}" 
-    mode:  0700
-  become: yes
-  become_user: oracle
+#- name: template over the stop-admin script
+#  template: 
+#    src:   stop-admin.py.j2
+#    dest:  "{{ scripts_home }}/stop-admin.py" 
+#    owner: "{{ oracle_user }}" 
+#    group: "{{ oracle_group }}" 
+#    mode:  0700
 
-- name: Copy wls-admin systemd script
-  template: 
-    src:  ../templates/wls-admin.service.j2 
-    dest: /etc/systemd/system/wls-admin.service 
-    mode: 0644
-#  become: yes
-#  become_user: root
+#- name: Copy wls-admin systemd script
+#  template: 
+#    src:  ../templates/wls-admin.service.j2 
+#    dest: /etc/systemd/system/wls-admin.service 
+#    mode: 0644
 
-- name: Enable wls-admin as linux service
-  service: 
-    name: wls-admin
-    enabled: true
-    state: restarted
-#  become: yes
-#  become_user: root
+#- name: Enable wls-admin as linux service
+#  service: 
+#    name: wls-admin
+#    enabled: true
+#    state: restarted
 
 - name: clean up create-domain.py script
-  file: 
+   file: 
    path: "{{ mw_installer_folder }}/create-domain.py"
    state: absent
