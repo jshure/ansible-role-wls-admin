@@ -2,9 +2,9 @@
 
 - name: template over the create-domain.py script
   template: 
-    src:  ../templates/create-domain.py.j2
-    dest: "{{ mw_installer_folder }}/create-domain.py"
-    mode: 0700
+   src:  ../templates/create-domain.py.j2
+   dest: "{{ mw_installer_folder }}/create-domain.py"
+   mode: 0700
   become: yes
   become_user: oracle
 
@@ -75,5 +75,5 @@
 
 - name: clean up create-domain.py script
   file: 
-    path: "{{ mw_installer_folder }}/create-domain.py"
-    state: absent
+   path: "{{ mw_installer_folder }}/create-domain.py"
+   state: absent
