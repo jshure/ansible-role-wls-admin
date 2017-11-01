@@ -41,21 +41,22 @@
     group: "{{ oracle_group }}" 
     mode:  0700
 
-- name: Copy wls-admin systemd script
-  template: 
-    src:  ../templates/wls-admin.service.j2 
-    dest: /etc/systemd/system/wls-admin.service 
-    mode: 0644
-  become: yes
-  become_user: root
+#Due to permissions issue will run this separately
+#- name: Copy wls-admin systemd script
+#  template: 
+#    src:  ../templates/wls-admin.service.j2 
+#    dest: /etc/systemd/system/wls-admin.service 
+#    mode: 0644
+#  become: yes
+#  become_user: root
 
-- name: Enable wls-admin as linux service
-  service: 
-    name: wls-admin
-    enabled: true
-    state: restarted
-  become: yes
-  become_user: root
+#- name: Enable wls-admin as linux service
+#  service: 
+#    name: wls-admin
+#    enabled: true
+#    state: restarted
+#  become: yes
+#  become_user: root
 
 - name: clean up create-domain.py script
   file: 
